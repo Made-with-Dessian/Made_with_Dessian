@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio — Mobility Designer</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0A0908;--surface:#151311;--text:#EDE8E0;--sub:#8A8680;
+  --red:#D1292E;--cyan:#3B8B8A;
+  --gf:rgba(237,232,224,0.04);--gb:rgba(237,232,224,0.12);
+  --ease:cubic-bezier(0.65,0,0.35,1);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;font-weight:300;overflow-x:hidden;cursor:none}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:160px;opacity:0.042;
+}
+
+/* ── CURSOR ─────────────────────────────────────────────────── */
+#cursor{
+  position:fixed;border-radius:50%;pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);
+  background:var(--gf);border:1px solid var(--gb);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  width:80px;height:80px;  /* 2/3 of original 120px */
+  transition:width .3s var(--ease),height .3s var(--ease),backdrop-filter .3s var(--ease),opacity .3s;
+}
+#cursor.hovering{
+  width:133px;height:133px; /* 2/3 of original 200px */
+  backdrop-filter:blur(32px) saturate(200%);
+  -webkit-backdrop-filter:blur(32px) saturate(200%);
+}
+#cursor.card-hover{
+  width:36px;height:36px;  /* shrinks on card hover */
+  backdrop-filter:blur(6px) saturate(110%);
+  -webkit-backdrop-filter:blur(6px) saturate(110%);
+  border-color:rgba(237,232,224,0.25);
+}
+
+/* ── NAV ─────────────────────────────────────────────────────── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  padding:28px 60px;display:flex;justify-content:space-between;align-items:center;
+  transition:background .25s,backdrop-filter .25s;
+}
+nav.scrolled{
+  background:rgba(10,9,8,0.72);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--gb);
+}
+.nav-logo{font-family:'Playfair Display',serif;font-size:18px;letter-spacing:.04em;color:var(--text);text-decoration:none}
+.nav-links{display:flex;gap:44px;list-style:none}
+.nav-links a{
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--sub);text-decoration:none;
+  transition:color .2s;position:relative;
+}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-4px;left:0;right:100%;
+  height:1px;background:var(--cyan);transition:right .3s var(--ease);
+}
+.nav-links a:hover{color:var(--text)}
+.nav-links a:hover::after{right:0}
+
+/* ── HERO ────────────────────────────────────────────────────── */
+#hero{
+  height:100vh;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;position:relative;overflow:hidden;
+}
+.hero-label{
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--cyan);margin-bottom:48px;
+  opacity:0;animation:fadeup .8s var(--ease) .3s forwards;
+}
+.hero-sketch-wrap{
+  position:relative;width:700px;height:310px;margin-bottom:56px;
+  will-change:transform,opacity;
+}
+#sketch-svg{width:100%;height:100%;overflow:visible}
+.hero-title{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(36px,4.5vw,60px);font-weight:400;line-height:1.1;
+  letter-spacing:-.01em;text-align:center;max-width:680px;
+  opacity:0;animation:fadeup 1s var(--ease) 3.6s forwards;
+}
+.hero-title em{font-style:italic;color:var(--sub)}
+.hero-sub{
+  margin-top:26px;font-family:'JetBrains Mono',monospace;font-size:11px;
+  letter-spacing:.12em;color:var(--sub);text-transform:uppercase;
+  opacity:0;animation:fadeup .8s var(--ease) 4s forwards;
+}
+.hero-scroll{
+  position:absolute;bottom:36px;left:50%;transform:translateX(-50%);
+  font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;
+  color:var(--sub);text-transform:uppercase;opacity:0;
+  animation:fadeup .6s var(--ease) 4.6s forwards;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+}
+.scroll-line{width:1px;height:36px;background:linear-gradient(to bottom,var(--sub),transparent)}
+
+/* ── ABOUT ───────────────────────────────────────────────────── */
+#about{
+  padding:160px 60px;max-width:1200px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;
+}
+.about-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:32px}
+.about-title{font-family:'Playfair Display',serif;font-size:clamp(26px,3vw,40px);font-weight:400;line-height:1.2;margin-bottom:28px}
+.about-title span{color:var(--red)}
+.about-body{font-size:15px;line-height:1.9;color:var(--sub);margin-bottom:38px}
+.keyword-tags{display:flex;flex-wrap:wrap;gap:10px}
+.tag{
+  font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--sub);border:1px solid var(--gb);
+  padding:6px 14px;border-radius:2px;transition:border-color .3s,color .3s;
+}
+.tag:hover{border-color:var(--cyan);color:var(--cyan)}
+.about-right{padding-top:80px}
+.stat-item{border-top:1px solid var(--gb);padding:26px 0;display:flex;justify-content:space-between;align-items:baseline}
+.stat-num{font-family:'Playfair Display',serif;font-size:40px;font-weight:400;color:var(--text)}
+.stat-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--sub);max-width:110px;text-align:right}
+
+/* ── FEATURED ────────────────────────────────────────────────── */
+#featured{padding:0 60px 160px}
+.section-header{max-width:1200px;margin:0 auto 64px;display:flex;justify-content:space-between;align-items:baseline}
+.section-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan)}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(22px,2.5vw,34px);font-weight:400}
+.view-all{
+  font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--sub);text-decoration:none;
+  border-bottom:1px solid var(--gb);padding-bottom:2px;transition:color .2s,border-color .2s;
+}
+.view-all:hover{color:var(--text);border-color:var(--text)}
+.cards-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+
+/* PROJECT CARD */
+.project-card{
+  position:relative;overflow:hidden;background:var(--surface);
+  aspect-ratio:3/4;
+}
+.card-bg{position:absolute;inset:0;transition:transform .8s var(--ease)}
+.project-card:hover .card-bg{transform:scale(1.04)}
+
+/* Glass overlay — slides up */
+.card-glass{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(10,9,8,0.58);
+  backdrop-filter:blur(28px) saturate(160%);
+  -webkit-backdrop-filter:blur(28px) saturate(160%);
+  border-top:1px solid var(--gb);padding:26px;
+  transform:translateY(100%);transition:transform .32s var(--ease);
+}
+.project-card:hover .card-glass{transform:translateY(0)}
+.card-year{
+  font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.15em;
+  color:var(--cyan);text-transform:uppercase;margin-bottom:10px;
+  opacity:0;transform:translateY(7px);transition:opacity .22s .04s,transform .22s .04s;
+}
+.project-card:hover .card-year{opacity:1;transform:translateY(0)}
+.card-title{
+  font-family:'Playfair Display',serif;font-size:21px;font-weight:400;
+  margin-bottom:7px;opacity:0;transform:translateY(7px);
+  transition:opacity .22s .11s,transform .22s .11s;
+}
+.project-card:hover .card-title{opacity:1;transform:translateY(0)}
+.card-cat{
+  font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--sub);
+  opacity:0;transform:translateY(7px);transition:opacity .22s .18s,transform .22s .18s;
+}
+.project-card:hover .card-cat{opacity:1;transform:translateY(0)}
+.card-shine{
+  position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:radial-gradient(180px circle at var(--mx,50%) var(--my,50%),rgba(237,232,224,0.07),transparent 70%);
+  transition:opacity .3s;
+}
+.project-card:hover .card-shine{opacity:1}
+
+/* ── CTA ─────────────────────────────────────────────────────── */
+#cta{
+  height:58vh;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;border-top:1px solid var(--gb);
+}
+.cta-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--red);margin-bottom:38px}
+.cta-title{font-family:'Playfair Display',serif;font-size:clamp(30px,4vw,54px);font-weight:400;font-style:italic;text-align:center;margin-bottom:46px;max-width:560px}
+.cta-btn{
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--bg);background:var(--text);
+  border:none;padding:15px 38px;cursor:none;text-decoration:none;
+  display:inline-block;transition:background .3s,color .3s;
+}
+.cta-btn:hover{background:var(--red);color:var(--text)}
+
+/* ── FOOTER ──────────────────────────────────────────────────── */
+footer{padding:38px 60px;border-top:1px solid var(--gb);display:flex;justify-content:space-between;align-items:center}
+.footer-copy{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;color:var(--sub);text-transform:uppercase}
+.footer-links{display:flex;gap:30px}
+.footer-links a{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--sub);text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:var(--text)}
+
+/* ── UTILS ───────────────────────────────────────────────────── */
+@keyframes fadeup{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.intertitle{
+  text-align:center;padding:80px 0 0;
+  font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--sub);position:relative;
+}
+.intertitle::before,.intertitle::after{content:'';position:absolute;top:50%;width:calc(50% - 80px);height:1px;background:var(--gb)}
+.intertitle::before{left:0}.intertitle::after{right:0}
+
+/* card mock backgrounds */
+.cm1{background:linear-gradient(150deg,#0e0d0c,#181512)}
+.cm2{background:linear-gradient(150deg,#0c0e0d,#141816)}
+.cm3{background:linear-gradient(150deg,#0e0c0c,#181413)}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">M·D</a>
+  <ul class="nav-links">
+    <li><a href="#">Portfolio</a></li>
+    <li><a href="#">3D Modeling</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <p class="hero-label">Mobility Designer — Seoul</p>
+
+  <div class="hero-sketch-wrap" id="sketchWrap">
+    <!--
+      Van silhouette matching uploaded reference:
+      · Cab-forward proportions, tall body
+      · Nearly flat roofline with fastback D-pillar slope
+      · Open wheel arches (arches cut downward from body bottom)
+      · Concentric wheel detail rings
+      · Red character line + cyan LED signatures
+    -->
+    <svg id="sketch-svg" viewBox="0 0 700 310" xmlns="http://www.w3.org/2000/svg" fill="none" overflow="visible">
+      <g id="car-group">
+
+        <!-- ① WHEELS — drawn before body outlines -->
+        <!-- Front wheel outer -->
+        <g id="fw">
+          <circle cx="204" cy="264" r="37"
+            stroke="#EDE8E0" stroke-width="1.3" fill="none"
+            stroke-dasharray="233" stroke-dashoffset="233">
+            <animate attributeName="stroke-dashoffset" from="233" to="0"
+              dur=".65s" begin="2.0s" fill="freeze"
+              calcMode="spline" keySplines="0.65 0 0.35 1"/>
+          </circle>
+          <!-- inner hub ring -->
+          <circle cx="204" cy="264" r="17"
+            stroke="#6A6660" stroke-width=".8" fill="none"
+            stroke-dasharray="107" stroke-dashoffset="107">
+            <animate attributeName="stroke-dashoffset" from="107" to="0"
+              dur=".4s" begin="2.55s" fill="freeze"/>
+          </circle>
+          <!-- center dot -->
+          <circle cx="204" cy="264" r="3" fill="#6A6660" opacity="0">
+            <animate attributeName="opacity" from="0" to="1" dur=".15s" begin="2.85s" fill="freeze"/>
+          </circle>
+          <!-- lug nut detail (4 small marks) -->
+          <line x1="204" y1="249" x2="204" y2="245" stroke="#6A6660" stroke-width=".7" opacity="0">
+            <animate attributeName="opacity" from="0" to="1" dur=".1s" begin="2.9s" fill="freeze"/>
+          </line>
+          <line x1="219" y1="264" x2="223" y2="264" stroke="#6A6660" stroke-width=".7" opacity="0">
+            <animate attributeName="opacity" from="0" to="1" dur=".1s" begin="2.9s" fill="freeze"/>
+          </line>
+          <line x1="204" y1="279" x2="204" y2="283" stroke="#6A6660" stroke-width=".7" opacity="0">
+            <animate attributeName="opacity" from="0" to="1" dur=".1s" begin="2.9s" fill="freeze"/>
+          </line>
+          <line x1="189" y1="264" x2="185" y2="264" stroke="#6A6660" stroke-width=".7" opacity="0">
+            <animate attributeName="opacity" from="0" to="1" dur=".1s" begin="2.9s" fill="freeze"/>
+          </line>
+        </g>
+
+        <!-- Rear wheel outer -->
+        <g id="rw">
+          <circle cx="494" cy="264" r="37"
+            stroke="#EDE8E0" stroke-width="1.3" fill="none"
+            stroke-dasharray="233" stroke-dashoffset="233">
+            <animate attributeName="stroke-dashoffset" from="233" to="0"
+              dur=".65s" begin="2.0s" fill="freeze"
+              calcMode="spline" keySplines="0.65 0 0.35 1"/>
+          </circle>
+          <circle cx="494" cy="264" r="17"
+            stroke="#6A6660" stroke-width=".8" fill="none"
+            stroke-dasharray="107" stroke-dashoffset="107">
+            <animate attributeName="stroke-dashoffset" from="107" to="0"
+              dur=".4s" begin="2.55s" fill="freeze"/>
+          </circle>
+          <circle cx="494" cy="264" r="3" fill="#6A6660" opacity="0">
+            <animate attributeName="opacity" from="0" to="1" dur=".15s" begin="2.85s" fill="freeze"/>
+          </circle>
+          <line x1="494" y1="249" x2="494" y2="245" stroke="#6A6660" stroke-width=".7" opacity="0">
+            <animate attributeName="opacity" from="0" to="1" dur=".1s" begin="2.9s" fill="freeze"/>
+          </line>
+          <line x1="509" y1="264" x2="513" y2="264" stroke="#6A6660" stroke-width=".7" opacity="0">
+            <animate attributeName="opacity" from="0" to="1" dur=".1s" begin="2.9s" fill="freeze"/>
+          </line>
+          <line x1="494" y1="279" x2="494" y2="283" stroke="#6A6660" stroke-width=".7" opacity="0">
+            <animate attributeName="opacity" from="0" to="1" dur=".1s" begin="2.9s" fill="freeze"/>
+          </line>
+          <line x1="479" y1="264" x2="475" y2="264" stroke="#6A6660" stroke-width=".7" opacity="0">
+            <animate attributeName="opacity" from="0" to="1" dur=".1s" begin="2.9s" fill="freeze"/>
+          </line>
+        </g>
+
+        <!-- ② BODY OUTLINE
+             Van proportions: cab-forward, tall body, fastback D-pillar.
+             Bottom path includes two downward arch cutouts (sweep=1 = CW = dips down)
+             matching the uploaded reference.
+        -->
+        <path
+          pathLength="1000"
+          d="
+            M 102 238
+            C 84 233 70 215 73 189
+            C 76 164 93 149 120 140
+            C 140 130 166 118 200 110
+            L 492 108
+            C 524 108 550 116 566 134
+            C 576 150 580 172 577 200
+            C 577 218 573 230 568 238
+            L 532 238
+            A 40 40 0 0 1 452 238
+            L 244 238
+            A 40 40 0 0 1 164 238
+            L 102 238 Z
+          "
+          stroke="#EDE8E0" stroke-width="1.3" fill="none"
+          stroke-linejoin="round" stroke-linecap="round"
+          stroke-dasharray="1000" stroke-dashoffset="1000">
+          <animate attributeName="stroke-dashoffset" from="1000" to="0"
+            dur="1.5s" begin=".3s" fill="freeze"
+            calcMode="spline" keySplines="0.65 0 0.35 1"/>
+        </path>
+
+        <!-- Windshield separation line (A-pillar) -->
+        <path d="M 124 142 L 198 110"
+          stroke="#8A8680" stroke-width=".7" fill="none" stroke-linecap="round"
+          stroke-dasharray="90" stroke-dashoffset="90" opacity="0">
+          <animate attributeName="stroke-dashoffset" from="90" to="0" dur=".4s" begin="1.5s" fill="freeze"/>
+          <animate attributeName="opacity" from="0" to="1" dur=".05s" begin="1.5s" fill="freeze"/>
+        </path>
+
+        <!-- D-pillar inner line -->
+        <path d="M 492 108 L 534 138 L 568 202"
+          stroke="#8A8680" stroke-width=".6" fill="none" stroke-linecap="round" stroke-linejoin="round"
+          stroke-dasharray="120" stroke-dashoffset="120" opacity="0">
+          <animate attributeName="stroke-dashoffset" from="120" to="0" dur=".5s" begin="1.65s" fill="freeze"/>
+          <animate attributeName="opacity" from="0" to="1" dur=".05s" begin="1.65s" fill="freeze"/>
+        </path>
+
+        <!-- Ground shadow (Fan Ho style) -->
+        <ellipse cx="349" cy="302" rx="0" ry="5" fill="rgba(0,0,0,0.38)">
+          <animate attributeName="rx" from="0" to="215" dur=".9s" begin="2.8s" fill="freeze"
+            calcMode="spline" keySplines="0.65 0 0.35 1"/>
+        </ellipse>
+
+        <!-- ③ CHARACTER LINE — RED (key design accent) -->
+        <path d="M 168 188 L 535 188"
+          stroke="#D1292E" stroke-width="1.3" fill="none" stroke-linecap="round"
+          stroke-dasharray="390" stroke-dashoffset="390" opacity="0">
+          <animate attributeName="stroke-dashoffset" from="390" to="0"
+            dur=".85s" begin="2.35s" fill="freeze"
+            calcMode="spline" keySplines="0.65 0 0.35 1"/>
+          <animate attributeName="opacity" from="0" to="1" dur=".05s" begin="2.35s" fill="freeze"/>
+        </path>
+
+        <!-- ④ LED SIGNATURES — CYAN -->
+        <line x1="79" y1="225" x2="100" y2="225"
+          stroke="#3B8B8A" stroke-width="2" stroke-linecap="round"
+          stroke-dasharray="24" stroke-dashoffset="24" opacity="0">
+          <animate attributeName="stroke-dashoffset" from="24" to="0" dur=".25s" begin="3.05s" fill="freeze"/>
+          <animate attributeName="opacity" from="0" to="1" dur=".05s" begin="3.05s" fill="freeze"/>
+        </line>
+        <line x1="569" y1="225" x2="590" y2="225"
+          stroke="#3B8B8A" stroke-width="2" stroke-linecap="round"
+          stroke-dasharray="24" stroke-dashoffset="24" opacity="0">
+          <animate attributeName="stroke-dashoffset" from="24" to="0" dur=".25s" begin="3.05s" fill="freeze"/>
+          <animate attributeName="opacity" from="0" to="1" dur=".05s" begin="3.05s" fill="freeze"/>
+        </line>
+
+      </g><!-- /car-group -->
+    </svg>
+  </div><!-- /hero-sketch-wrap -->
+
+  <h1 class="hero-title">Boundary between<br><em>vehicle and object.</em></h1>
+  <p class="hero-sub">Future Mobility · Hard-Surface · Character Line</p>
+  <div class="hero-scroll">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="reveal">
+    <p class="about-label">// 001 — About</p>
+    <h2 class="about-title">A line that<br>carries <span>intention.</span></h2>
+    <p class="about-body">
+      Designing at the threshold between vehicle and product.<br>
+      Starting from persona context, converging through the tension of sculptural references,
+      and resolving in the decisive stroke of a ballpoint pen.
+    </p>
+    <div class="keyword-tags">
+      <span class="tag">Hard-surface</span>
+      <span class="tag">Minimal tension</span>
+      <span class="tag">Character line</span>
+      <span class="tag">Boundary</span>
+      <span class="tag">Future mobility</span>
+    </div>
+  </div>
+  <div class="about-right reveal">
+    <div class="stat-item">
+      <span class="stat-num">03</span>
+      <span class="stat-label">Completed Projects</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">A3</span>
+      <span class="stat-label">Ballpoint Sketch Format</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">360°</span>
+      <span class="stat-label">CMF Interactive Model</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num" style="color:var(--red)">∞</span>
+      <span class="stat-label">Iterations per Concept</span>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED PROJECTS -->
+<section id="featured">
+  <div class="intertitle reveal">Featured Projects</div>
+  <div class="section-header reveal" style="margin-top:64px">
+    <div>
+      <p class="section-label">// 002 — Work</p>
+      <h2 class="section-title">Selected Projects</h2>
+    </div>
+    <a href="#" class="view-all">View All →</a>
+  </div>
+
+  <div class="cards-grid">
+
+    <!-- CARD 1 -->
+    <div class="project-card" data-card>
+      <div class="card-bg cm1" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+        <svg width="80%" viewBox="0 0 380 200" fill="none" style="opacity:.5">
+          <path d="M 55 155 C 44 150 36 136 38 118 C 40 102 52 93 68 88 C 84 83 105 81 140 80 L 300 80 C 328 80 345 86 356 98 C 364 108 366 125 362 155" stroke="#EDE8E0" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="42" y1="155" x2="362" y2="155" stroke="#EDE8E0" stroke-width="1.2"/>
+          <circle cx="100" cy="174" r="22" stroke="#EDE8E0" stroke-width="1.1" fill="none"/>
+          <circle cx="100" cy="174" r="10" stroke="#6A6660" stroke-width=".7" fill="none"/>
+          <circle cx="300" cy="174" r="22" stroke="#EDE8E0" stroke-width="1.1" fill="none"/>
+          <circle cx="300" cy="174" r="10" stroke="#6A6660" stroke-width=".7" fill="none"/>
+          <path d="M 78 118 L 290 116" stroke="#D1292E" stroke-width=".9" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="card-glass">
+        <p class="card-year">2024 — Concept</p>
+        <h3 class="card-title">Form 01</h3>
+        <p class="card-cat">Urban Micro Mobility</p>
+      </div>
+      <div class="card-shine"></div>
+    </div>
+
+    <!-- CARD 2 (offset top) -->
+    <div class="project-card" data-card style="margin-top:52px">
+      <div class="card-bg cm2" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+        <svg width="80%" viewBox="0 0 380 200" fill="none" style="opacity:.5">
+          <path d="M 40 158 C 30 152 24 138 26 118 C 28 100 42 90 68 85 C 94 80 130 78 200 77 C 268 77 308 80 332 92 C 350 102 358 120 355 158" stroke="#EDE8E0" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="30" y1="158" x2="360" y2="158" stroke="#EDE8E0" stroke-width="1.2"/>
+          <circle cx="90" cy="178" r="24" stroke="#EDE8E0" stroke-width="1.1" fill="none"/>
+          <circle cx="90" cy="178" r="11" stroke="#6A6660" stroke-width=".7" fill="none"/>
+          <circle cx="305" cy="178" r="24" stroke="#EDE8E0" stroke-width="1.1" fill="none"/>
+          <circle cx="305" cy="178" r="11" stroke="#6A6660" stroke-width=".7" fill="none"/>
+          <path d="M 65 118 L 318 116" stroke="#3B8B8A" stroke-width=".9" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="card-glass">
+        <p class="card-year">2024 — Concept</p>
+        <h3 class="card-title">Boundary 02</h3>
+        <p class="card-cat">Autonomous Vehicle</p>
+      </div>
+      <div class="card-shine"></div>
+    </div>
+
+    <!-- CARD 3 -->
+    <div class="project-card" data-card>
+      <div class="card-bg cm3" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+        <svg width="80%" viewBox="0 0 380 200" fill="none" style="opacity:.5">
+          <path d="M 62 152 C 52 147 44 134 46 116 C 48 100 60 91 84 86 C 108 81 148 79 200 79 C 252 79 292 82 316 94 C 334 104 340 120 338 152" stroke="#EDE8E0" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="50" y1="152" x2="342" y2="152" stroke="#EDE8E0" stroke-width="1.2"/>
+          <circle cx="108" cy="172" r="22" stroke="#EDE8E0" stroke-width="1.1" fill="none"/>
+          <circle cx="108" cy="172" r="10" stroke="#6A6660" stroke-width=".7" fill="none"/>
+          <circle cx="296" cy="172" r="22" stroke="#EDE8E0" stroke-width="1.1" fill="none"/>
+          <circle cx="296" cy="172" r="10" stroke="#6A6660" stroke-width=".7" fill="none"/>
+          <path d="M 84 114 L 305 112" stroke="#D1292E" stroke-width=".9" stroke-linecap="round"/>
+          <line x1="108" y1="86" x2="108" y2="152" stroke="#8A8680" stroke-width=".5"/>
+          <line x1="280" y1="82" x2="280" y2="152" stroke="#8A8680" stroke-width=".5"/>
+        </svg>
+      </div>
+      <div class="card-glass">
+        <p class="card-year">2023 — Concept</p>
+        <h3 class="card-title">Object 03</h3>
+        <p class="card-cat">Product-Vehicle Crossover</p>
+      </div>
+      <div class="card-shine"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <p class="cta-tag reveal">// Contact</p>
+  <h2 class="cta-title reveal">"Let's design<br>a boundary."</h2>
+  <a href="#" class="cta-btn reveal">Get In Touch</a>
+</section>
+
+<!-- FOOTER -->
+<footer class="reveal">
+  <p class="footer-copy">© 2024 — Mobility Designer</p>
+  <div class="footer-links">
+    <a href="#">Behance</a>
+    <a href="#">Instagram</a>
+    <a href="#">LinkedIn</a>
+  </div>
+</footer>
+
+<script>
+/* ══ CURSOR ══════════════════════════════════════════════════════ */
+const cursor = document.getElementById('cursor');
+let cx = innerWidth/2, cy = innerHeight/2, tx = cx, ty = cy;
+
+document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
+
+/* Hoverable: expand cursor */
+document.querySelectorAll('a, button, .tag, .view-all, .cta-btn').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    if (!cursor.classList.contains('card-hover')) cursor.classList.add('hovering');
+  });
+  el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+});
+
+/* Card: SHRINK cursor */
+document.querySelectorAll('[data-card]').forEach(card => {
+  card.addEventListener('mouseenter', () => {
+    cursor.classList.remove('hovering');
+    cursor.classList.add('card-hover');
+  });
+  card.addEventListener('mouseleave', () => cursor.classList.remove('card-hover'));
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%');
+    card.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
+  });
+});
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+(function tick() {
+  const dx = tx - cx, dy = ty - cy;
+  const speed = Math.sqrt(dx*dx + dy*dy);
+  const stretch = Math.min(1 + speed * 0.009, 1.3);
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+  cx = lerp(cx, tx, 0.12);
+  cy = lerp(cy, ty, 0.12);
+  cursor.style.left = cx + 'px';
+  cursor.style.top  = cy + 'px';
+  cursor.style.transform = `translate(-50%,-50%) rotate(${angle}deg) scaleX(${stretch}) rotate(${-angle}deg)`;
+  requestAnimationFrame(tick);
+})();
+
+/* ══ NAV SCROLL ══════════════════════════════════════════════════ */
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', scrollY > 40);
+}, { passive: true });
+
+/* ══ SCROLL REVEAL ═══════════════════════════════════════════════ */
+const ro = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+/* ══ CAR SCROLL-EXIT ANIMATION ═══════════════════════════════════
+   On scroll: wheels roll (CCW — car faces left, passenger-side view)
+              car wrapper slides LEFT and fades out
+   Start: scrollY = 60px   |   End: scrollY = 480px
+*/
+const sketchWrap = document.getElementById('sketchWrap');
+const fw = document.getElementById('fw');
+const rw = document.getElementById('rw');
+
+let lastProg = 0;
+
+window.addEventListener('scroll', () => {
+  const prog = Math.max(0, Math.min((scrollY - 60) / 420, 1));
+  if (Math.abs(prog - lastProg) < 0.002) return; // skip tiny updates
+  lastProg = prog;
+
+  // Wheels: CCW rotation (negative angle) as car moves left
+  const rot = -(prog * 720).toFixed(2);
+  fw.setAttribute('transform', `rotate(${rot}, 204, 264)`);
+  rw.setAttribute('transform', `rotate(${rot}, 494, 264)`);
+
+  // Wrapper: translate left (forward direction) + fade
+  const tx = -(prog * 820).toFixed(1);
+  const op = Math.max(0, 1 - prog * 1.4).toFixed(3);
+  sketchWrap.style.transform = `translateX(${tx}px)`;
+  sketchWrap.style.opacity = op;
+}, { passive: true });
+</script>
+</body>
+</html>
