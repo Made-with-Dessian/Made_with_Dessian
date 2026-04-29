@@ -1,3 +1,5 @@
 export default function Home() {
-  return null;
+  return (
+    <meta httpEquiv="refresh" content="0; url=/portfolio.html" />
+  )
 }
