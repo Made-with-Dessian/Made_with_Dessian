@@ -28,15 +28,22 @@ body::before{
   background:var(--gf);border:1px solid var(--gb);
   backdrop-filter:blur(20px) saturate(180%);
   -webkit-backdrop-filter:blur(20px) saturate(180%);
-  width:80px;height:80px;
+  width:44px;height:44px;
   transition:width .3s var(--ease),height .3s var(--ease),backdrop-filter .3s var(--ease);
 }
-#cursor.hovering{width:120px;height:120px;backdrop-filter:blur(28px) saturate(200%);-webkit-backdrop-filter:blur(28px) saturate(200%)}
+#cursor.hovering{width:72px;height:72px;backdrop-filter:blur(28px) saturate(200%);-webkit-backdrop-filter:blur(28px) saturate(200%)}
 #cursor.card-hover{
-  width:28px;height:28px;
+  width:24px;height:24px;
   backdrop-filter:blur(4px) saturate(100%);
   -webkit-backdrop-filter:blur(4px) saturate(100%);
   border-color:rgba(237,232,224,0.3);
+}
+#cursor.filter-hover{
+  width:16px;height:16px;
+  backdrop-filter:blur(3px) saturate(90%);
+  -webkit-backdrop-filter:blur(3px) saturate(90%);
+  border-color:rgba(59,139,138,0.5);
+  background:rgba(59,139,138,0.06);
 }
 
 /* ── NAV ─────────────────────────────────────────────────────── */
@@ -310,7 +317,7 @@ nav{
 <script>
 /* ══ PROJECT DATA (18 cards) ═══════════════════════════════════ */
 const PROJECTS = [
-  {id:'p01',title:'Form 01',year:'2024',cat:'Urban Micro Mobility',terrain:'on-road',type:'mobility',accent:'red'},
+  {id:'project-01',title:'Project 01',year:'2025',cat:'Off-Road Mobility Concept',terrain:'off-road',type:'mobility',accent:'red',real:true,thumb:'images/project-01-thumb.jpg'},
   {id:'p02',title:'Boundary 02',year:'2024',cat:'Autonomous Van',terrain:'on-road',type:'mobility',accent:'cyan'},
   {id:'p03',title:'Object 03',year:'2023',cat:'Product-Vehicle Crossover',terrain:'on-road',type:'sedan',accent:'red'},
   {id:'p04',title:'Silhouette 04',year:'2024',cat:'Sports Sedan',terrain:'on-road',type:'sedan',accent:'red'},
@@ -331,7 +338,8 @@ const PROJECTS = [
 ];
 
 /* ── Vehicle SVG variants per type ──────────────────────────── */
-function vehicleSVG(type, accent, id) {
+function vehicleSVG(type, accent, id, real, thumb) {
+  if (real && thumb) return '';
   const a = accent === 'red' ? '#D1292E' : '#3B8B8A';
   const seed = parseInt(id.replace('p',''));
 
@@ -421,9 +429,13 @@ function buildGrid(projects) {
       const shade = BG_SHADES[globalIdx % BG_SHADES.length];
       const numStr = String(r + colIdx + 1).padStart(2,'0');
 
+      const svgContent = vehicleSVG(p.type, p.accent, p.id, p.real, p.thumb);
+      const visualInner = p.real && p.thumb
+        ? `<img src="${p.thumb}" alt="${p.title}" style="width:100%;height:100%;object-fit:cover;object-position:center;filter:grayscale(20%) contrast(1.1);">`
+        : svgContent;
       card.innerHTML = `
-        <div class="card-visual" style="background:${shade}">
-          ${vehicleSVG(p.type, p.accent, p.id)}
+        <div class="card-visual" style="background:${p.real && p.thumb ? '#0A0908' : shade}">
+          ${visualInner}
         </div>
         <div class="card-index">${numStr}</div>
         <div class="card-glow"></div>
@@ -445,9 +457,10 @@ function buildGrid(projects) {
         card.style.setProperty('--my', ((e.clientY-rect.top)/rect.height*100).toFixed(1)+'%');
       });
       card.addEventListener('click', () => {
-        // future: navigate to /portfolio/${p.id}
-        console.log('Navigate to', p.id);
+        const dest = p.real ? `portfolio-detail-${p.id}.html` : `#`;
+        if (p.real) window.location.href = dest;
       });
+      if (p.real) card.style.cursor = 'none';
 
       row.appendChild(card);
     });
@@ -514,9 +527,18 @@ let cx = innerWidth/2, cy = innerHeight/2, tx = cx, ty = cy;
 
 document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
 
-document.querySelectorAll('a,button,.filter-btn,.filter-reset').forEach(el => {
-  el.addEventListener('mouseenter', () => { if (!cursor.classList.contains('card-hover')) cursor.classList.add('hovering'); });
+document.querySelectorAll('a,.filter-reset,.nav-links a').forEach(el => {
+  el.addEventListener('mouseenter', () => { if (!cursor.classList.contains('card-hover') && !cursor.classList.contains('filter-hover')) cursor.classList.add('hovering'); });
   el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+});
+
+/* Filter buttons get their own tiny cursor */
+document.querySelectorAll('.filter-btn').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.classList.remove('hovering','card-hover');
+    cursor.classList.add('filter-hover');
+  });
+  el.addEventListener('mouseleave', () => cursor.classList.remove('filter-hover'));
 });
 
 function lerp(a,b,t){return a+(b-a)*t}
