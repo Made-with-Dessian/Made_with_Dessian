@@ -12,32 +12,38 @@
   --red:#D1292E;--cyan:#3B8B8A;
   --gf:rgba(237,232,224,0.04);--gb:rgba(237,232,224,0.12);
   --ease:cubic-bezier(0.65,0,0.35,1);
+  --pad-x: clamp(20px, 4vw, 60px);
 }
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;font-weight:300;overflow-x:hidden;cursor:none}
+body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;font-weight:300;overflow-x:hidden;cursor:auto}
+/* Only hide cursor on mouse-capable devices */
+body.has-mouse{cursor:none}
 body::before{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size:160px;opacity:0.042;
 }
 
-/* ── CURSOR ─────────────────────────────────────────────────── */
+/* ── CURSOR — hidden until mouse detected ───────────────────── */
 #cursor{
   position:fixed;border-radius:50%;pointer-events:none;z-index:9998;
   transform:translate(-50%,-50%);
   background:var(--gf);border:1px solid var(--gb);
   backdrop-filter:blur(20px) saturate(180%);
   -webkit-backdrop-filter:blur(20px) saturate(180%);
-  width:80px;height:80px;  /* 2/3 of original 120px */
-  transition:width .3s var(--ease),height .3s var(--ease),backdrop-filter .3s var(--ease),opacity .3s;
+  width:80px;height:80px;
+  transition:width .3s var(--ease),height .3s var(--ease),backdrop-filter .3s var(--ease),opacity .25s;
+  opacity:0;display:none; /* hidden by default */
 }
+body.has-mouse #cursor{display:block}
+body.has-mouse #cursor.cursor-visible{opacity:1}
 #cursor.hovering{
-  width:133px;height:133px; /* 2/3 of original 200px */
+  width:133px;height:133px;
   backdrop-filter:blur(32px) saturate(200%);
   -webkit-backdrop-filter:blur(32px) saturate(200%);
 }
 #cursor.card-hover{
-  width:36px;height:36px;  /* shrinks on card hover */
+  width:36px;height:36px;
   backdrop-filter:blur(6px) saturate(110%);
   -webkit-backdrop-filter:blur(6px) saturate(110%);
   border-color:rgba(237,232,224,0.25);
@@ -46,7 +52,7 @@ body::before{
 /* ── NAV ─────────────────────────────────────────────────────── */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:1000;
-  padding:28px 60px;display:flex;justify-content:space-between;align-items:center;
+  padding:24px var(--pad-x);display:flex;justify-content:space-between;align-items:center;
   transition:background .25s,backdrop-filter .25s;
 }
 nav.scrolled{
@@ -55,7 +61,7 @@ nav.scrolled{
   border-bottom:1px solid var(--gb);
 }
 .nav-logo{font-family:'Playfair Display',serif;font-size:18px;letter-spacing:.04em;color:var(--text);text-decoration:none}
-.nav-links{display:flex;gap:44px;list-style:none}
+.nav-links{display:flex;gap:clamp(20px,3vw,44px);list-style:none}
 .nav-links a{
   font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;
   text-transform:uppercase;color:var(--sub);text-decoration:none;
@@ -70,33 +76,38 @@ nav.scrolled{
 
 /* ── HERO ────────────────────────────────────────────────────── */
 #hero{
-  height:100vh;display:flex;align-items:center;justify-content:center;
-  flex-direction:column;position:relative;overflow:hidden;
+  height:100svh;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;position:relative;overflow:hidden;padding:0 var(--pad-x);
 }
 .hero-label{
-  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;
-  text-transform:uppercase;color:var(--cyan);margin-bottom:48px;
+  font-family:'JetBrains Mono',monospace;font-size:clamp(9px,1.5vw,11px);letter-spacing:.2em;
+  text-transform:uppercase;color:var(--cyan);margin-bottom:clamp(28px,4vh,48px);
   opacity:0;animation:fadeup .8s var(--ease) .3s forwards;
 }
 .hero-sketch-wrap{
-  position:relative;width:700px;height:310px;margin-bottom:56px;
+  position:relative;
+  width:min(700px, calc(100vw - 40px));
+  height:auto;
+  aspect-ratio:700/310;
+  margin-bottom:clamp(28px,4vh,56px);
   will-change:transform,opacity;
 }
 #sketch-svg{width:100%;height:100%;overflow:visible}
 .hero-title{
   font-family:'Playfair Display',serif;
-  font-size:clamp(36px,4.5vw,60px);font-weight:400;line-height:1.1;
-  letter-spacing:-.01em;text-align:center;max-width:680px;
+  font-size:clamp(24px,4.5vw,60px);font-weight:400;line-height:1.1;
+  letter-spacing:-.01em;text-align:center;max-width:min(680px, 90vw);
   opacity:0;animation:fadeup 1s var(--ease) 3.6s forwards;
 }
 .hero-title em{font-style:italic;color:var(--sub)}
 .hero-sub{
-  margin-top:26px;font-family:'JetBrains Mono',monospace;font-size:11px;
+  margin-top:clamp(16px,2vh,26px);font-family:'JetBrains Mono',monospace;font-size:clamp(9px,1.2vw,11px);
   letter-spacing:.12em;color:var(--sub);text-transform:uppercase;
   opacity:0;animation:fadeup .8s var(--ease) 4s forwards;
+  text-align:center;
 }
 .hero-scroll{
-  position:absolute;bottom:36px;left:50%;transform:translateX(-50%);
+  position:absolute;bottom:clamp(20px,3vh,36px);left:50%;transform:translateX(-50%);
   font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;
   color:var(--sub);text-transform:uppercase;opacity:0;
   animation:fadeup .6s var(--ease) 4.6s forwards;
@@ -106,13 +117,14 @@ nav.scrolled{
 
 /* ── ABOUT ───────────────────────────────────────────────────── */
 #about{
-  padding:160px 60px;max-width:1200px;margin:0 auto;
-  display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;
+  padding:clamp(80px,10vw,160px) var(--pad-x);
+  max-width:1200px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;gap:clamp(40px,6vw,80px);align-items:start;
 }
 .about-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:32px}
-.about-title{font-family:'Playfair Display',serif;font-size:clamp(26px,3vw,40px);font-weight:400;line-height:1.2;margin-bottom:28px}
+.about-title{font-family:'Playfair Display',serif;font-size:clamp(22px,3vw,40px);font-weight:400;line-height:1.2;margin-bottom:28px}
 .about-title span{color:var(--red)}
-.about-body{font-size:15px;line-height:1.9;color:var(--sub);margin-bottom:38px}
+.about-body{font-size:clamp(13px,1.4vw,15px);line-height:1.9;color:var(--sub);margin-bottom:38px}
 .keyword-tags{display:flex;flex-wrap:wrap;gap:10px}
 .tag{
   font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;
@@ -120,23 +132,28 @@ nav.scrolled{
   padding:6px 14px;border-radius:2px;transition:border-color .3s,color .3s;
 }
 .tag:hover{border-color:var(--cyan);color:var(--cyan)}
-.about-right{padding-top:80px}
-.stat-item{border-top:1px solid var(--gb);padding:26px 0;display:flex;justify-content:space-between;align-items:baseline}
-.stat-num{font-family:'Playfair Display',serif;font-size:40px;font-weight:400;color:var(--text)}
+.about-right{padding-top:clamp(0px,4vw,80px)}
+.stat-item{border-top:1px solid var(--gb);padding:clamp(18px,2vw,26px) 0;display:flex;justify-content:space-between;align-items:baseline}
+.stat-num{font-family:'Playfair Display',serif;font-size:clamp(28px,3vw,40px);font-weight:400;color:var(--text)}
 .stat-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--sub);max-width:110px;text-align:right}
 
 /* ── FEATURED ────────────────────────────────────────────────── */
-#featured{padding:0 60px 160px}
-.section-header{max-width:1200px;margin:0 auto 64px;display:flex;justify-content:space-between;align-items:baseline}
+#featured{padding:0 var(--pad-x) clamp(80px,10vw,160px)}
+.section-header{max-width:1200px;margin:0 auto 64px;display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:16px}
 .section-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan)}
-.section-title{font-family:'Playfair Display',serif;font-size:clamp(22px,2.5vw,34px);font-weight:400}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(20px,2.5vw,34px);font-weight:400}
 .view-all{
   font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.15em;
   text-transform:uppercase;color:var(--sub);text-decoration:none;
   border-bottom:1px solid var(--gb);padding-bottom:2px;transition:color .2s,border-color .2s;
 }
 .view-all:hover{color:var(--text);border-color:var(--text)}
-.cards-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.cards-grid{
+  max-width:1200px;margin:0 auto;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:2px;
+}
 
 /* PROJECT CARD */
 .project-card{
@@ -146,14 +163,19 @@ nav.scrolled{
 .card-bg{position:absolute;inset:0;transition:transform .8s var(--ease)}
 .project-card:hover .card-bg{transform:scale(1.04)}
 
-/* Glass overlay — slides up */
+/* Glass overlay */
 .card-glass{
   position:absolute;bottom:0;left:0;right:0;
   background:rgba(10,9,8,0.58);
   backdrop-filter:blur(28px) saturate(160%);
   -webkit-backdrop-filter:blur(28px) saturate(160%);
-  border-top:1px solid var(--gb);padding:26px;
+  border-top:1px solid var(--gb);padding:clamp(16px,2vw,26px);
   transform:translateY(100%);transition:transform .32s var(--ease);
+}
+/* Touch devices: always show card info */
+@media (hover:none){
+  .card-glass{transform:translateY(0)}
+  .card-year,.card-title,.card-cat{opacity:1!important;transform:translateY(0)!important}
 }
 .project-card:hover .card-glass{transform:translateY(0)}
 .card-year{
@@ -163,7 +185,7 @@ nav.scrolled{
 }
 .project-card:hover .card-year{opacity:1;transform:translateY(0)}
 .card-title{
-  font-family:'Playfair Display',serif;font-size:21px;font-weight:400;
+  font-family:'Playfair Display',serif;font-size:clamp(16px,1.8vw,21px);font-weight:400;
   margin-bottom:7px;opacity:0;transform:translateY(7px);
   transition:opacity .22s .11s,transform .22s .11s;
 }
@@ -183,23 +205,25 @@ nav.scrolled{
 
 /* ── CTA ─────────────────────────────────────────────────────── */
 #cta{
-  height:58vh;display:flex;flex-direction:column;align-items:center;
+  min-height:50vh;display:flex;flex-direction:column;align-items:center;
   justify-content:center;border-top:1px solid var(--gb);
+  padding:60px var(--pad-x);text-align:center;
 }
 .cta-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--red);margin-bottom:38px}
-.cta-title{font-family:'Playfair Display',serif;font-size:clamp(30px,4vw,54px);font-weight:400;font-style:italic;text-align:center;margin-bottom:46px;max-width:560px}
+.cta-title{font-family:'Playfair Display',serif;font-size:clamp(24px,4vw,54px);font-weight:400;font-style:italic;text-align:center;margin-bottom:46px;max-width:min(560px,90vw)}
 .cta-btn{
   font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;
   text-transform:uppercase;color:var(--bg);background:var(--text);
-  border:none;padding:15px 38px;cursor:none;text-decoration:none;
+  border:none;padding:15px 38px;cursor:pointer;text-decoration:none;
   display:inline-block;transition:background .3s,color .3s;
 }
+body.has-mouse .cta-btn{cursor:none}
 .cta-btn:hover{background:var(--red);color:var(--text)}
 
 /* ── FOOTER ──────────────────────────────────────────────────── */
-footer{padding:38px 60px;border-top:1px solid var(--gb);display:flex;justify-content:space-between;align-items:center}
+footer{padding:clamp(24px,3vw,38px) var(--pad-x);border-top:1px solid var(--gb);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
 .footer-copy{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;color:var(--sub);text-transform:uppercase}
-.footer-links{display:flex;gap:30px}
+.footer-links{display:flex;gap:clamp(16px,2vw,30px);flex-wrap:wrap}
 .footer-links a{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--sub);text-decoration:none;transition:color .2s}
 .footer-links a:hover{color:var(--text)}
 
@@ -219,6 +243,33 @@ footer{padding:38px 60px;border-top:1px solid var(--gb);display:flex;justify-con
 .cm1{background:linear-gradient(150deg,#0e0d0c,#181512)}
 .cm2{background:linear-gradient(150deg,#0c0e0d,#141816)}
 .cm3{background:linear-gradient(150deg,#0e0c0c,#181413)}
+
+/* ── RESPONSIVE ──────────────────────────────────────────────── */
+/* Tablet: 768 ~ 1024 */
+@media (max-width:1024px){
+  .cards-grid{grid-template-columns:repeat(2,1fr)}
+  /* Remove the offset top on middle card since grid changes */
+  .project-card[style*="margin-top"]{margin-top:0!important}
+}
+/* Mobile: ~ 768 */
+@media (max-width:768px){
+  .nav-links{gap:20px}
+  .nav-links a{font-size:10px;letter-spacing:.1em}
+  #about{grid-template-columns:1fr}
+  .about-right{padding-top:0}
+  .cards-grid{grid-template-columns:1fr}
+  .project-card{aspect-ratio:4/3} /* wider on mobile, easier to browse */
+  .section-header{flex-direction:column;gap:12px;align-items:flex-start}
+}
+/* Small mobile: ~ 430 */
+@media (max-width:430px){
+  .nav-links li:last-child{display:none} /* hide Contact on very small, keep Portfolio + 3D */
+}
+/* Reduced motion */
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+  .reveal{opacity:1;transform:none}
+}
 </style>
 </head>
 <body>
@@ -240,19 +291,10 @@ footer{padding:38px 60px;border-top:1px solid var(--gb);display:flex;justify-con
   <p class="hero-label">Mobility Designer — Seoul</p>
 
   <div class="hero-sketch-wrap" id="sketchWrap">
-    <!--
-      Van silhouette matching uploaded reference:
-      · Cab-forward proportions, tall body
-      · Nearly flat roofline with fastback D-pillar slope
-      · Open wheel arches (arches cut downward from body bottom)
-      · Concentric wheel detail rings
-      · Red character line + cyan LED signatures
-    -->
     <svg id="sketch-svg" viewBox="0 0 700 310" xmlns="http://www.w3.org/2000/svg" fill="none" overflow="visible">
       <g id="car-group">
 
-        <!-- ① WHEELS — drawn before body outlines -->
-        <!-- Front wheel outer -->
+        <!-- ① WHEELS -->
         <g id="fw">
           <circle cx="204" cy="264" r="37"
             stroke="#EDE8E0" stroke-width="1.3" fill="none"
@@ -261,18 +303,15 @@ footer{padding:38px 60px;border-top:1px solid var(--gb);display:flex;justify-con
               dur=".65s" begin="2.0s" fill="freeze"
               calcMode="spline" keySplines="0.65 0 0.35 1"/>
           </circle>
-          <!-- inner hub ring -->
           <circle cx="204" cy="264" r="17"
             stroke="#6A6660" stroke-width=".8" fill="none"
             stroke-dasharray="107" stroke-dashoffset="107">
             <animate attributeName="stroke-dashoffset" from="107" to="0"
               dur=".4s" begin="2.55s" fill="freeze"/>
           </circle>
-          <!-- center dot -->
           <circle cx="204" cy="264" r="3" fill="#6A6660" opacity="0">
             <animate attributeName="opacity" from="0" to="1" dur=".15s" begin="2.85s" fill="freeze"/>
           </circle>
-          <!-- lug nut detail (4 small marks) -->
           <line x1="204" y1="249" x2="204" y2="245" stroke="#6A6660" stroke-width=".7" opacity="0">
             <animate attributeName="opacity" from="0" to="1" dur=".1s" begin="2.9s" fill="freeze"/>
           </line>
@@ -287,7 +326,6 @@ footer{padding:38px 60px;border-top:1px solid var(--gb);display:flex;justify-con
           </line>
         </g>
 
-        <!-- Rear wheel outer -->
         <g id="rw">
           <circle cx="494" cy="264" r="37"
             stroke="#EDE8E0" stroke-width="1.3" fill="none"
@@ -319,11 +357,7 @@ footer{padding:38px 60px;border-top:1px solid var(--gb);display:flex;justify-con
           </line>
         </g>
 
-        <!-- ② BODY OUTLINE
-             Van proportions: cab-forward, tall body, fastback D-pillar.
-             Bottom path includes two downward arch cutouts (sweep=1 = CW = dips down)
-             matching the uploaded reference.
-        -->
+        <!-- ② BODY OUTLINE -->
         <path
           pathLength="1000"
           d="
@@ -349,7 +383,6 @@ footer{padding:38px 60px;border-top:1px solid var(--gb);display:flex;justify-con
             calcMode="spline" keySplines="0.65 0 0.35 1"/>
         </path>
 
-        <!-- Windshield separation line (A-pillar) -->
         <path d="M 124 142 L 198 110"
           stroke="#8A8680" stroke-width=".7" fill="none" stroke-linecap="round"
           stroke-dasharray="90" stroke-dashoffset="90" opacity="0">
@@ -357,7 +390,6 @@ footer{padding:38px 60px;border-top:1px solid var(--gb);display:flex;justify-con
           <animate attributeName="opacity" from="0" to="1" dur=".05s" begin="1.5s" fill="freeze"/>
         </path>
 
-        <!-- D-pillar inner line -->
         <path d="M 492 108 L 534 138 L 568 202"
           stroke="#8A8680" stroke-width=".6" fill="none" stroke-linecap="round" stroke-linejoin="round"
           stroke-dasharray="120" stroke-dashoffset="120" opacity="0">
@@ -365,13 +397,12 @@ footer{padding:38px 60px;border-top:1px solid var(--gb);display:flex;justify-con
           <animate attributeName="opacity" from="0" to="1" dur=".05s" begin="1.65s" fill="freeze"/>
         </path>
 
-        <!-- Ground shadow (Fan Ho style) -->
         <ellipse cx="349" cy="302" rx="0" ry="5" fill="rgba(0,0,0,0.38)">
           <animate attributeName="rx" from="0" to="215" dur=".9s" begin="2.8s" fill="freeze"
             calcMode="spline" keySplines="0.65 0 0.35 1"/>
         </ellipse>
 
-        <!-- ③ CHARACTER LINE — RED (key design accent) -->
+        <!-- ③ CHARACTER LINE — RED -->
         <path d="M 168 188 L 535 188"
           stroke="#D1292E" stroke-width="1.3" fill="none" stroke-linecap="round"
           stroke-dasharray="390" stroke-dashoffset="390" opacity="0">
@@ -395,9 +426,9 @@ footer{padding:38px 60px;border-top:1px solid var(--gb);display:flex;justify-con
           <animate attributeName="opacity" from="0" to="1" dur=".05s" begin="3.05s" fill="freeze"/>
         </line>
 
-      </g><!-- /car-group -->
+      </g>
     </svg>
-  </div><!-- /hero-sketch-wrap -->
+  </div>
 
   <h1 class="hero-title">Boundary between<br><em>vehicle and object.</em></h1>
   <p class="hero-sub">Future Mobility · Hard-Surface · Character Line</p>
@@ -479,8 +510,8 @@ footer{padding:38px 60px;border-top:1px solid var(--gb);display:flex;justify-con
       <div class="card-shine"></div>
     </div>
 
-    <!-- CARD 2 (offset top) -->
-    <div class="project-card" data-card style="margin-top:52px">
+    <!-- CARD 2 -->
+    <div class="project-card" data-card>
       <div class="card-bg cm2" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
         <svg width="80%" viewBox="0 0 380 200" fill="none" style="opacity:.5">
           <path d="M 40 158 C 30 152 24 138 26 118 C 28 100 42 90 68 85 C 94 80 130 78 200 77 C 268 77 308 80 332 92 C 350 102 358 120 355 158" stroke="#EDE8E0" stroke-width="1.2" stroke-linecap="round"/>
@@ -544,11 +575,50 @@ footer{padding:38px 60px;border-top:1px solid var(--gb);display:flex;justify-con
 </footer>
 
 <script>
-/* ══ CURSOR ══════════════════════════════════════════════════════ */
+/* ══ CURSOR — Mouse detection ════════════════════════════════════
+   - Touch-only devices: cursor never appears
+   - Mouse/trackpad: appears on first mousemove, follows with lerp
+   - If touch starts after mouse detected: hides permanently
+*/
 const cursor = document.getElementById('cursor');
-let cx = innerWidth/2, cy = innerHeight/2, tx = cx, ty = cy;
+let cx = 0, cy = 0, tx = 0, ty = 0;
+let hasMouse = false;
+let rafId = null;
 
-document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+function tick() {
+  const dx = tx - cx, dy = ty - cy;
+  const speed = Math.sqrt(dx*dx + dy*dy);
+  const stretch = Math.min(1 + speed * 0.009, 1.3);
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+  cx = lerp(cx, tx, 0.12);
+  cy = lerp(cy, ty, 0.12);
+  cursor.style.left = cx + 'px';
+  cursor.style.top  = cy + 'px';
+  cursor.style.transform = `translate(-50%,-50%) rotate(${angle}deg) scaleX(${stretch}) rotate(${-angle}deg)`;
+  rafId = requestAnimationFrame(tick);
+}
+
+document.addEventListener('mousemove', e => {
+  tx = e.clientX;
+  ty = e.clientY;
+  if (!hasMouse) {
+    hasMouse = true;
+    // Initialize position instantly (no lerp jump from 0,0)
+    cx = e.clientX; cy = e.clientY;
+    document.body.classList.add('has-mouse');
+    cursor.classList.add('cursor-visible');
+    tick(); // start RAF loop
+  }
+}, { passive: true });
+
+// Touch device: hide cursor permanently
+document.addEventListener('touchstart', () => {
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  document.body.classList.remove('has-mouse');
+  cursor.style.display = 'none';
+}, { passive: true, once: true });
 
 /* Hoverable: expand cursor */
 document.querySelectorAll('a, button, .tag, .view-all, .cta-btn').forEach(el => {
@@ -558,7 +628,7 @@ document.querySelectorAll('a, button, .tag, .view-all, .cta-btn').forEach(el => 
   el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
 });
 
-/* Card: SHRINK cursor */
+/* Card: shrink cursor + shine */
 document.querySelectorAll('[data-card]').forEach(card => {
   card.addEventListener('mouseenter', () => {
     cursor.classList.remove('hovering');
@@ -572,21 +642,6 @@ document.querySelectorAll('[data-card]').forEach(card => {
   });
 });
 
-function lerp(a, b, t) { return a + (b - a) * t; }
-
-(function tick() {
-  const dx = tx - cx, dy = ty - cy;
-  const speed = Math.sqrt(dx*dx + dy*dy);
-  const stretch = Math.min(1 + speed * 0.009, 1.3);
-  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-  cx = lerp(cx, tx, 0.12);
-  cy = lerp(cy, ty, 0.12);
-  cursor.style.left = cx + 'px';
-  cursor.style.top  = cy + 'px';
-  cursor.style.transform = `translate(-50%,-50%) rotate(${angle}deg) scaleX(${stretch}) rotate(${-angle}deg)`;
-  requestAnimationFrame(tick);
-})();
-
 /* ══ NAV SCROLL ══════════════════════════════════════════════════ */
 const nav = document.getElementById('nav');
 window.addEventListener('scroll', () => {
@@ -599,31 +654,24 @@ const ro = new IntersectionObserver(entries => {
 }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
 
-/* ══ CAR SCROLL-EXIT ANIMATION ═══════════════════════════════════
-   On scroll: wheels roll (CCW — car faces left, passenger-side view)
-              car wrapper slides LEFT and fades out
-   Start: scrollY = 60px   |   End: scrollY = 480px
-*/
+/* ══ CAR SCROLL-EXIT ANIMATION ═══════════════════════════════════ */
 const sketchWrap = document.getElementById('sketchWrap');
 const fw = document.getElementById('fw');
 const rw = document.getElementById('rw');
-
 let lastProg = 0;
 
 window.addEventListener('scroll', () => {
   const prog = Math.max(0, Math.min((scrollY - 60) / 420, 1));
-  if (Math.abs(prog - lastProg) < 0.002) return; // skip tiny updates
+  if (Math.abs(prog - lastProg) < 0.002) return;
   lastProg = prog;
 
-  // Wheels: CCW rotation (negative angle) as car moves left
   const rot = -(prog * 720).toFixed(2);
   fw.setAttribute('transform', `rotate(${rot}, 204, 264)`);
   rw.setAttribute('transform', `rotate(${rot}, 494, 264)`);
 
-  // Wrapper: translate left (forward direction) + fade
-  const tx = -(prog * 820).toFixed(1);
+  const slideX = -(prog * 820).toFixed(1);
   const op = Math.max(0, 1 - prog * 1.4).toFixed(3);
-  sketchWrap.style.transform = `translateX(${tx}px)`;
+  sketchWrap.style.transform = `translateX(${slideX}px)`;
   sketchWrap.style.opacity = op;
 }, { passive: true });
 </script>

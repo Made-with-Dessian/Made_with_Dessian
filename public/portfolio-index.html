@@ -14,14 +14,16 @@
   --ease:cubic-bezier(0.65,0,0.35,1);
 }
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;font-weight:300;overflow-x:hidden;cursor:none;min-height:100vh}
+body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;font-weight:300;overflow-x:hidden;cursor:auto;min-height:100vh}
+body.has-mouse{cursor:none}
+:root{--pad-x:clamp(20px,4vw,60px)}
 body::before{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size:160px;opacity:0.042;
 }
 
-/* ── CURSOR ─────────────────────────────────────────────────── */
+/* ── CURSOR — hidden until mouse detected ───────────────────── */
 #cursor{
   position:fixed;border-radius:50%;pointer-events:none;z-index:9998;
   transform:translate(-50%,-50%);
@@ -29,8 +31,11 @@ body::before{
   backdrop-filter:blur(20px) saturate(180%);
   -webkit-backdrop-filter:blur(20px) saturate(180%);
   width:44px;height:44px;
-  transition:width .3s var(--ease),height .3s var(--ease),backdrop-filter .3s var(--ease);
+  transition:width .3s var(--ease),height .3s var(--ease),backdrop-filter .3s var(--ease),opacity .25s;
+  opacity:0;display:none;
 }
+body.has-mouse #cursor{display:block}
+body.has-mouse #cursor.cursor-visible{opacity:1}
 #cursor.hovering{width:72px;height:72px;backdrop-filter:blur(28px) saturate(200%);-webkit-backdrop-filter:blur(28px) saturate(200%)}
 #cursor.card-hover{
   width:24px;height:24px;
@@ -49,7 +54,7 @@ body::before{
 /* ── NAV ─────────────────────────────────────────────────────── */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:1000;
-  padding:26px 60px;display:flex;justify-content:space-between;align-items:center;
+  padding:26px var(--pad-x);display:flex;justify-content:space-between;align-items:center;
   background:rgba(10,9,8,0.72);
   backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
   border-bottom:1px solid var(--gb);
@@ -67,7 +72,7 @@ nav{
 .nav-links a.active::after{right:0}
 
 /* ── PAGE WRAPPER ───────────────────────────────────────────── */
-.page{padding:120px 60px 100px;max-width:1400px;margin:0 auto}
+.page{padding:120px var(--pad-x) 100px;max-width:1400px;margin:0 auto}
 
 /* ── PAGE HEADER ────────────────────────────────────────────── */
 .page-header{margin-bottom:64px}
@@ -104,7 +109,7 @@ nav{
   color:var(--sub);background:transparent;
   border:1px solid var(--gb);
   padding:9px 20px;border-radius:2px;
-  cursor:none;transition:color .25s var(--ease),border-color .25s var(--ease);
+  cursor:pointer;transition:color .25s var(--ease),border-color .25s var(--ease);
   position:relative;overflow:visible;
 }
 /* glass chip — tightly sized to text, expands from center */
@@ -140,7 +145,7 @@ nav{
   font-family:'JetBrains Mono',monospace;font-size:9px;
   letter-spacing:.18em;text-transform:uppercase;
   color:var(--sub);background:transparent;border:none;
-  cursor:none;transition:color .2s;padding:7px 0;
+  cursor:pointer;transition:color .2s;padding:7px 0;
   text-decoration:underline;text-underline-offset:3px;
   text-decoration-color:var(--gb);
 }
@@ -259,7 +264,38 @@ nav{
 }
 .no-results.show{display:block}
 
-/* ── UTILS ───────────────────────────────────────────────────── */
+/* ── RESPONSIVE ──────────────────────────────────────────────── */
+/* Tablet */
+@media (max-width:1024px){
+  .grid-row{grid-template-columns:repeat(2,1fr)!important}
+  .grid-row .project-card:nth-child(2){margin-top:0}
+}
+/* Mobile */
+@media (max-width:768px){
+  .nav-links{gap:20px}
+  .nav-links a{font-size:10px;letter-spacing:.08em}
+  .grid-row{grid-template-columns:1fr!important}
+  .project-card{aspect-ratio:4/3}
+  .filter-bar{margin-bottom:40px}
+  .filter-row{gap:8px}
+  .filter-divider{display:none}
+  .page-header{margin-bottom:40px}
+}
+@media (max-width:430px){
+  .nav-links li:last-child{display:none}
+  .filter-label{display:none}
+}
+/* Touch: always show card info */
+@media (hover:none){
+  .card-glass{transform:translateY(0)!important}
+  .card-year,.card-title,.card-cat{opacity:1!important;transform:translateY(0)!important}
+}
+/* Reduced motion */
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+  .reveal{opacity:1;transform:none}
+}
+body.has-mouse .filter-btn,body.has-mouse .filter-reset{cursor:none}
 @keyframes fadeup{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
 .reveal.visible{opacity:1;transform:translateY(0)}
@@ -521,11 +557,40 @@ document.getElementById('reset-all').addEventListener('click', () => {
   applyFilters();
 });
 
-/* ══ CURSOR ═══════════════════════════════════════════════════ */
+/* ══ CURSOR — Mouse detection ════════════════════════════════════ */
 const cursor = document.getElementById('cursor');
-let cx = innerWidth/2, cy = innerHeight/2, tx = cx, ty = cy;
+let cx = 0, cy = 0, tx = 0, ty = 0;
+let hasMouse = false, rafId = null;
 
-document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
+function lerp(a,b,t){return a+(b-a)*t}
+
+function tick(){
+  const dx=tx-cx,dy=ty-cy;
+  const speed=Math.sqrt(dx*dx+dy*dy);
+  const stretch=Math.min(1+speed*.009,1.3);
+  const angle=Math.atan2(dy,dx)*180/Math.PI;
+  cx=lerp(cx,tx,.12); cy=lerp(cy,ty,.12);
+  cursor.style.left=cx+'px'; cursor.style.top=cy+'px';
+  cursor.style.transform=`translate(-50%,-50%) rotate(${angle}deg) scaleX(${stretch}) rotate(${-angle}deg)`;
+  rafId=requestAnimationFrame(tick);
+}
+
+document.addEventListener('mousemove', e => {
+  tx=e.clientX; ty=e.clientY;
+  if(!hasMouse){
+    hasMouse=true;
+    cx=e.clientX; cy=e.clientY;
+    document.body.classList.add('has-mouse');
+    cursor.classList.add('cursor-visible');
+    tick();
+  }
+},{passive:true});
+
+document.addEventListener('touchstart',()=>{
+  if(rafId){cancelAnimationFrame(rafId);rafId=null;}
+  document.body.classList.remove('has-mouse');
+  cursor.style.display='none';
+},{passive:true,once:true});
 
 document.querySelectorAll('a,.filter-reset,.nav-links a').forEach(el => {
   el.addEventListener('mouseenter', () => { if (!cursor.classList.contains('card-hover') && !cursor.classList.contains('filter-hover')) cursor.classList.add('hovering'); });
@@ -540,18 +605,6 @@ document.querySelectorAll('.filter-btn').forEach(el => {
   });
   el.addEventListener('mouseleave', () => cursor.classList.remove('filter-hover'));
 });
-
-function lerp(a,b,t){return a+(b-a)*t}
-(function tick(){
-  const dx=tx-cx,dy=ty-cy;
-  const speed=Math.sqrt(dx*dx+dy*dy);
-  const stretch=Math.min(1+speed*.009,1.3);
-  const angle=Math.atan2(dy,dx)*180/Math.PI;
-  cx=lerp(cx,tx,.12); cy=lerp(cy,ty,.12);
-  cursor.style.left=cx+'px'; cursor.style.top=cy+'px';
-  cursor.style.transform=`translate(-50%,-50%) rotate(${angle}deg) scaleX(${stretch}) rotate(${-angle}deg)`;
-  requestAnimationFrame(tick);
-})();
 
 /* ══ SCROLL REVEAL ═══════════════════════════════════════════ */
 const ro = new IntersectionObserver(entries=>{
