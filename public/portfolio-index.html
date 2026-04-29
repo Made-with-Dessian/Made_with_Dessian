@@ -12,18 +12,18 @@
   --red:#D1292E;--cyan:#3B8B8A;
   --gf:rgba(237,232,224,0.04);--gb:rgba(237,232,224,0.12);
   --ease:cubic-bezier(0.65,0,0.35,1);
+  --pad-x:clamp(20px,4vw,60px);
 }
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;font-weight:300;overflow-x:hidden;cursor:auto;min-height:100vh}
 body.has-mouse{cursor:none}
-:root{--pad-x:clamp(20px,4vw,60px)}
 body::before{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size:160px;opacity:0.042;
 }
 
-/* ── CURSOR — hidden until mouse detected ───────────────────── */
+/* ── CURSOR ─────────────────────────────────────────────────── */
 #cursor{
   position:fixed;border-radius:50%;pointer-events:none;z-index:9998;
   transform:translate(-50%,-50%);
@@ -109,7 +109,7 @@ nav{
   color:var(--sub);background:transparent;
   border:1px solid var(--gb);
   padding:9px 20px;border-radius:2px;
-  cursor:pointer;transition:color .25s var(--ease),border-color .25s var(--ease);
+  cursor:none;transition:color .25s var(--ease),border-color .25s var(--ease);
   position:relative;overflow:visible;
 }
 /* glass chip — tightly sized to text, expands from center */
@@ -145,7 +145,7 @@ nav{
   font-family:'JetBrains Mono',monospace;font-size:9px;
   letter-spacing:.18em;text-transform:uppercase;
   color:var(--sub);background:transparent;border:none;
-  cursor:pointer;transition:color .2s;padding:7px 0;
+  cursor:none;transition:color .2s;padding:7px 0;
   text-decoration:underline;text-underline-offset:3px;
   text-decoration-color:var(--gb);
 }
@@ -264,38 +264,37 @@ nav{
 }
 .no-results.show{display:block}
 
+
 /* ── RESPONSIVE ──────────────────────────────────────────────── */
-/* Tablet */
 @media (max-width:1024px){
   .grid-row{grid-template-columns:repeat(2,1fr)!important}
   .grid-row .project-card:nth-child(2){margin-top:0}
 }
-/* Mobile */
 @media (max-width:768px){
-  .nav-links{gap:20px}
+  .nav-links{gap:18px}
   .nav-links a{font-size:10px;letter-spacing:.08em}
   .grid-row{grid-template-columns:1fr!important}
   .project-card{aspect-ratio:4/3}
-  .filter-bar{margin-bottom:40px}
-  .filter-row{gap:8px}
+  .filter-bar{margin-bottom:36px}
+  .filter-row{gap:8px;flex-wrap:wrap}
   .filter-divider{display:none}
-  .page-header{margin-bottom:40px}
 }
 @media (max-width:430px){
   .nav-links li:last-child{display:none}
-  .filter-label{display:none}
+  .filter-label{min-width:auto;font-size:8px}
 }
-/* Touch: always show card info */
 @media (hover:none){
   .card-glass{transform:translateY(0)!important}
   .card-year,.card-title,.card-cat{opacity:1!important;transform:translateY(0)!important}
+  .filter-btn{cursor:pointer}
 }
-/* Reduced motion */
+body.has-mouse .filter-btn,body.has-mouse .filter-reset{cursor:none}
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.01ms!important;transition-duration:.01ms!important}
   .reveal{opacity:1;transform:none}
 }
-body.has-mouse .filter-btn,body.has-mouse .filter-reset{cursor:none}
+
+/* ── UTILS ───────────────────────────────────────────────────── */
 @keyframes fadeup{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
 .reveal.visible{opacity:1;transform:translateY(0)}
@@ -307,7 +306,7 @@ body.has-mouse .filter-btn,body.has-mouse .filter-reset{cursor:none}
 
 <!-- NAV -->
 <nav>
-  <a href="home-prototype-v2.html" class="nav-logo">M·D</a>
+  <a href="index.html" class="nav-logo">M·D</a>
   <ul class="nav-links">
     <li><a href="#" class="active">Portfolio</a></li>
     <li><a href="#">3D Modeling</a></li>
@@ -557,40 +556,23 @@ document.getElementById('reset-all').addEventListener('click', () => {
   applyFilters();
 });
 
-/* ══ CURSOR — Mouse detection ════════════════════════════════════ */
+/* ══ CURSOR ═══════════════════════════════════════════════════ */
 const cursor = document.getElementById('cursor');
-let cx = 0, cy = 0, tx = 0, ty = 0;
-let hasMouse = false, rafId = null;
-
+let cx=0,cy=0,tx=0,ty=0,hasMouse=false,rafId=null;
 function lerp(a,b,t){return a+(b-a)*t}
-
 function tick(){
-  const dx=tx-cx,dy=ty-cy;
-  const speed=Math.sqrt(dx*dx+dy*dy);
-  const stretch=Math.min(1+speed*.009,1.3);
-  const angle=Math.atan2(dy,dx)*180/Math.PI;
-  cx=lerp(cx,tx,.12); cy=lerp(cy,ty,.12);
-  cursor.style.left=cx+'px'; cursor.style.top=cy+'px';
+  const dx=tx-cx,dy=ty-cy,speed=Math.sqrt(dx*dx+dy*dy);
+  const stretch=Math.min(1+speed*.009,1.3),angle=Math.atan2(dy,dx)*180/Math.PI;
+  cx=lerp(cx,tx,.12);cy=lerp(cy,ty,.12);
+  cursor.style.left=cx+'px';cursor.style.top=cy+'px';
   cursor.style.transform=`translate(-50%,-50%) rotate(${angle}deg) scaleX(${stretch}) rotate(${-angle}deg)`;
   rafId=requestAnimationFrame(tick);
 }
-
-document.addEventListener('mousemove', e => {
-  tx=e.clientX; ty=e.clientY;
-  if(!hasMouse){
-    hasMouse=true;
-    cx=e.clientX; cy=e.clientY;
-    document.body.classList.add('has-mouse');
-    cursor.classList.add('cursor-visible');
-    tick();
-  }
+document.addEventListener('mousemove',e=>{
+  tx=e.clientX;ty=e.clientY;
+  if(!hasMouse){hasMouse=true;cx=e.clientX;cy=e.clientY;document.body.classList.add('has-mouse');cursor.classList.add('cursor-visible');tick();}
 },{passive:true});
-
-document.addEventListener('touchstart',()=>{
-  if(rafId){cancelAnimationFrame(rafId);rafId=null;}
-  document.body.classList.remove('has-mouse');
-  cursor.style.display='none';
-},{passive:true,once:true});
+document.addEventListener('touchstart',()=>{if(rafId){cancelAnimationFrame(rafId);rafId=null;}document.body.classList.remove('has-mouse');cursor.style.display='none';},{passive:true,once:true});
 
 document.querySelectorAll('a,.filter-reset,.nav-links a').forEach(el => {
   el.addEventListener('mouseenter', () => { if (!cursor.classList.contains('card-hover') && !cursor.classList.contains('filter-hover')) cursor.classList.add('hovering'); });
@@ -605,6 +587,8 @@ document.querySelectorAll('.filter-btn').forEach(el => {
   });
   el.addEventListener('mouseleave', () => cursor.classList.remove('filter-hover'));
 });
+
+
 
 /* ══ SCROLL REVEAL ═══════════════════════════════════════════ */
 const ro = new IntersectionObserver(entries=>{

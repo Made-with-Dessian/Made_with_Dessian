@@ -141,7 +141,7 @@ nav.scrolled{
 /* PROJECT CARD */
 .project-card{
   position:relative;overflow:hidden;background:var(--surface);
-  aspect-ratio:3/4;
+  aspect-ratio:3/4;cursor:pointer;
 }
 .card-bg{position:absolute;inset:0;transition:transform .8s var(--ease)}
 .project-card:hover .card-bg{transform:scale(1.04)}
@@ -227,9 +227,9 @@ footer{padding:38px 60px;border-top:1px solid var(--gb);display:flex;justify-con
 
 <!-- NAV -->
 <nav id="nav">
-  <a href="#" class="nav-logo">M·D</a>
+  <a href="index.html" class="nav-logo">M·D</a>
   <ul class="nav-links">
-    <li><a href="#">Portfolio</a></li>
+    <li><a href="portfolio-index.html">Portfolio</a></li>
     <li><a href="#">3D Modeling</a></li>
     <li><a href="#">Contact</a></li>
   </ul>
@@ -453,13 +453,13 @@ footer{padding:38px 60px;border-top:1px solid var(--gb);display:flex;justify-con
       <p class="section-label">// 002 — Work</p>
       <h2 class="section-title">Selected Projects</h2>
     </div>
-    <a href="#" class="view-all">View All →</a>
+    <a href="portfolio-index.html" class="view-all">View All →</a>
   </div>
 
   <div class="cards-grid">
 
     <!-- CARD 1 -->
-    <div class="project-card" data-card>
+    <a href="portfolio-detail-project-01.html" class="project-card" data-card style="display:block;text-decoration:none;color:inherit">
       <div class="card-bg cm1" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
         <svg width="80%" viewBox="0 0 380 200" fill="none" style="opacity:.5">
           <path d="M 55 155 C 44 150 36 136 38 118 C 40 102 52 93 68 88 C 84 83 105 81 140 80 L 300 80 C 328 80 345 86 356 98 C 364 108 366 125 362 155" stroke="#EDE8E0" stroke-width="1.2" stroke-linecap="round"/>
@@ -477,10 +477,10 @@ footer{padding:38px 60px;border-top:1px solid var(--gb);display:flex;justify-con
         <p class="card-cat">Urban Micro Mobility</p>
       </div>
       <div class="card-shine"></div>
-    </div>
+    </a>
 
-    <!-- CARD 2 (offset top) -->
-    <div class="project-card" data-card style="margin-top:52px">
+    <!-- CARD 2 -->
+    <a href="portfolio-index.html" class="project-card" data-card style="display:block;text-decoration:none;color:inherit">
       <div class="card-bg cm2" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
         <svg width="80%" viewBox="0 0 380 200" fill="none" style="opacity:.5">
           <path d="M 40 158 C 30 152 24 138 26 118 C 28 100 42 90 68 85 C 94 80 130 78 200 77 C 268 77 308 80 332 92 C 350 102 358 120 355 158" stroke="#EDE8E0" stroke-width="1.2" stroke-linecap="round"/>
@@ -498,10 +498,10 @@ footer{padding:38px 60px;border-top:1px solid var(--gb);display:flex;justify-con
         <p class="card-cat">Autonomous Vehicle</p>
       </div>
       <div class="card-shine"></div>
-    </div>
+    </a>
 
     <!-- CARD 3 -->
-    <div class="project-card" data-card>
+    <a href="portfolio-index.html" class="project-card" data-card style="display:block;text-decoration:none;color:inherit">
       <div class="card-bg cm3" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
         <svg width="80%" viewBox="0 0 380 200" fill="none" style="opacity:.5">
           <path d="M 62 152 C 52 147 44 134 46 116 C 48 100 60 91 84 86 C 108 81 148 79 200 79 C 252 79 292 82 316 94 C 334 104 340 120 338 152" stroke="#EDE8E0" stroke-width="1.2" stroke-linecap="round"/>
@@ -521,7 +521,7 @@ footer{padding:38px 60px;border-top:1px solid var(--gb);display:flex;justify-con
         <p class="card-cat">Product-Vehicle Crossover</p>
       </div>
       <div class="card-shine"></div>
-    </div>
+    </a>
 
   </div>
 </section>
